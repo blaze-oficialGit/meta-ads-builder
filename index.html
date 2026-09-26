@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meta Ads Campaign Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(226, 232, 240, 0.8); }
+        .btn-primary { background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); transition: all 0.2s ease; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25); }
+        .mic-active { animation: pulse-red 1.5s infinite; background: #ef4444 !important; }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .sidebar-item.active { background: #f0f9ff; border-right: 3px solid #0ea5e9; color: #0369a1; font-weight: 600; }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="min-h-screen flex">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col fixed h-full z-40 shadow-sm">
+        <div class="p-6 border-b border-slate-100">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-sky-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-sky-200">M</div>
+                <div>
+                    <h1 class="text-base font-bold text-slate-800 leading-tight">Campaign</h1>
+                    <p class="text-xs text-slate-500 font-medium">Builder MVP</p>
+                </div>
+            </div>
+        </div>
+        <nav class="flex-1 py-6 space-y-1 px-3">
+            <button onclick="switchView('dashboard')" id="nav-dashboard" class="sidebar-item active w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-600 hover:bg-slate-50 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                Dashboard
+            </button>
+            <button onclick="switchView('accounts')" id="nav-accounts" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-600 hover:bg-slate-50 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                Contas & BMs
+            </button>
+            <button onclick="switchView('creatives')" id="nav-creatives" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-600 hover:bg-slate-50 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                Criativos
+            </button>
+            <button onclick="switchView('campaigns')" id="nav-campaigns" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-600 hover:bg-slate-50 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                Criar Campanhas
+            </button>
+        </nav>
+        <div class="p-4 border-t border-slate-100">
+            <div id="connection-badge" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 cursor-pointer hover:bg-slate-100 transition-colors" onclick="switchView('accounts')">
+                <span class="w-2 h-2 rounded-full bg-slate-400" id="conn-dot"></span>
+                <span class="text-xs font-medium text-slate-600" id="conn-text">Desconectado</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 ml-64 p-8 max-w-[1600px] mx-auto">
+        <!-- VIEW: DASHBOARD -->
+        <section id="view-dashboard" class="space-y-6 fade-in">
+            <header class="mb-8">
+                <h2 class="text-2xl font-bold text-slate-800">Dashboard</h2>
+                <p class="text-slate-500 mt-1">Visão geral das suas contas e atividades recentes</p>
+            </header>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-panel rounded-2xl p-6 shadow-sm">
+                    <p class="text-sm font-medium text-slate-500 mb-2">Contas Conectadas</p>
+                    <p class="text-3xl font-bold text-slate-800" id="dash-account-count">0</p>
+                </div>
+                <div class="glass-panel rounded-2xl p-6 shadow-sm">
+                    <p class="text-sm font-medium text-slate-500 mb-2">BMs Ativos</p>
+                    <p class="text-3xl font-bold text-slate-800" id="dash-bm-count">0</p>
+                </div>
+                <div class="glass-panel rounded-2xl p-6 shadow-sm">
+                    <p class="text-sm font-medium text-slate-500 mb-2">Criativos Carregados</p>
+                    <p class="text-3xl font-bold text-slate-800" id="dash-creative-count">0</p>
+                </div>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 shadow-sm mt-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">Atividade Recente</h3>
+                <div id="activity-log" class="space-y-3 text-sm text-slate-600">
+                    <p class="italic text-slate-400">Nenhuma atividade recente.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW: ACCOUNTS & BMS -->
+        <section id="view-accounts" class="hidden space-y-6 fade-in">
+            <header class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">Contas & Business Managers</h2>
+                    <p class="text-slate-500 mt-1">Gerencie suas conexões e selecione contas para campanhas</p>
+                </div>
+                <button id="btn-connect-meta" class="btn-primary text-white px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-md">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                    Conectar Meta
+                </button>
+            </header>
+            <div id="bm-container" class="space-y-6 hidden"></div>
+            <div id="accounts-empty-state" class="text-center py-20 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
+                <svg class="w-16 h-16 text-slate-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                <h3 class="text-lg font-medium text-slate-700">Nenhuma conta conectada</h3>
+                <p class="text-slate-500 mt-1 mb-6">Conecte sua conta Meta para começar a criar campanhas</p>
+                <button onclick="document.getElementById('btn-connect-meta').click()" class="text-sky-600 font-medium hover:text-sky-700">Conectar agora &rarr;</button>
+            </div>
+        </section>
+
+        <!-- VIEW: CREATIVES -->
+        <section id="view-creatives" class="hidden space-y-6 fade-in">
+            <header class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-800">Biblioteca de Criativos</h2>
+                <p class="text-slate-500 mt-1">Envie imagens e vídeos para usar nas suas campanhas</p>
+            </header>
+            <div id="drop-zone" class="border-2 border-dashed border-slate-300 rounded-2xl p-12 text-center hover:border-sky-400 hover:bg-sky-50/50 transition-all cursor-pointer group bg-white">
+                <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-slate-400 group-hover:text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                </div>
+                <p class="text-slate-700 font-semibold text-lg">Arraste seus criativos aqui</p>
+                <p class="text-slate-400 text-sm mt-2">ou clique para selecionar • JPG, PNG, MP4</p>
+                <input type="file" id="file-input" class="hidden" multiple accept="image/*,video/*">
+            </div>
+            <div id="creatives-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-8"></div>
+        </section>
+
+        <!-- VIEW: CAMPAIGNS -->
+        <section id="view-campaigns" class="hidden space-y-6 fade-in">
+            <header class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-800">Criar Campanhas com IA</h2>
+                <p class="text-slate-500 mt-1">Descreva o que você quer e a IA configura tudo</p>
+            </header>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="glass-panel rounded-2xl p-6 shadow-sm relative overflow-hidden">
+                        <label class="block text-sm font-semibold text-slate-700 mb-3">Seu comando</label>
+                        <div class="relative">
+                            <textarea id="command-input" rows="5" class="w-full p-4 pr-14 rounded-xl border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 outline-none resize-none text-slate-700 placeholder-slate-400 transition-all text-base" placeholder="Ex: Crie 5 campanhas CBO de vendas, homens de 25 a 45 anos, R$100 por dia, começando à meia-noite."></textarea>
+                            <button id="btn-mic" class="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors" title="Falar comando">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+                            </button>
+                        </div>
+                        <div class="mt-4 flex justify-end">
+                            <button id="btn-interpret" class="bg-slate-800 hover:bg-slate-900 text-white px-6 py-2.5 rounded-lg font-medium flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                Interpretar Comando
+                            </button>
+                        </div>
+                    </div>
+                    <div id="config-section" class="hidden glass-panel rounded-2xl p-6 shadow-sm border-l-4 border-l-sky-500 fade-in">
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <h3 class="text-lg font-semibold text-slate-800">Configuração Interpretada</h3>
+                                <p class="text-sm text-slate-500">Revise os parâmetros antes de criar</p>
+                            </div>
+                            <button id="btn-edit" class="text-sky-600 hover:text-sky-700 text-sm font-medium">Editar</button>
+                        </div>
+                        <div id="config-summary" class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6"></div>
+                        <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                            <button id="btn-cancel" class="px-5 py-2.5 rounded-lg text-slate-600 hover:bg-slate-100 font-medium transition-colors">Cancelar</button>
+                            <button id="btn-create" class="btn-primary text-white px-8 py-2.5 rounded-lg font-semibold shadow-lg shadow-sky-200/50">Criar Campanhas</button>
+                        </div>
+                    </div>
+                    <div id="status-section" class="hidden glass-panel rounded-2xl p-6 shadow-sm">
+                        <h3 class="text-lg font-semibold text-slate-800 mb-4">Status da Criação</h3>
+                        <div id="creation-log" class="space-y-2 font-mono text-sm max-h-60 overflow-y-auto"></div>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <div class="glass-panel rounded-2xl p-6 shadow-sm">
+                        <h3 class="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">Contas Selecionadas</h3>
+                        <div id="selected-accounts-mini" class="space-y-2 text-sm">
+                            <p class="text-slate-400 italic text-xs">Nenhuma conta selecionada.</p>
+                        </div>
+                        <button onclick="switchView('accounts')" class="mt-4 w-full py-2 text-xs font-medium text-sky-600 hover:bg-sky-50 rounded-lg transition-colors">Gerenciar Contas</button>
+                    </div>
+                    <div class="glass-panel rounded-2xl p-6 shadow-sm">
+                        <h3 class="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">Criativos Disponíveis</h3>
+                        <div id="creatives-mini" class="grid grid-cols-3 gap-2">
+                            <p class="col-span-3 text-slate-400 italic text-xs">Nenhum criativo carregado.</p>
+                        </div>
+                        <button onclick="switchView('creatives')" class="mt-4 w-full py-2 text-xs font-medium text-sky-600 hover:bg-sky-50 rounded-lg transition-colors">Gerenciar Criativos</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // --- CONFIGURAÇÃO IMPORTANTE ---
+        // Substitua a URL abaixo pela URL do seu backend no Railway
+        const API_BASE = 'https://SEU-BACKEND-RAILWAY.up.railway.app';
+
+        const state = { connected: false, businesses: [], creatives: [], interpretedConfig: null, isRecording: false };
+
+        window.switchView = (viewId) => {
+            document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`view-${viewId}`).classList.remove('hidden');
+            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`nav-${viewId}`).classList.add('active');
+            if (viewId === 'dashboard') updateDashboard();
+            if (viewId === 'campaigns') updateCampaignSidebar();
+        };
+
+        document.getElementById('btn-connect-meta').addEventListener('click', () => {
+            window.location.href = `${API_BASE}/api/auth/login`;
+        });
+
+        async function checkAuth() {
+            try {
+                const res = await fetch(`${API_BASE}/api/auth/status`, { credentials: 'include' });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.connected) {
+                        state.connected = true;
+                        state.businesses = data.businesses || [];
+                        updateConnectionUI(true);
+                        renderAccounts();
+                    }
+                }
+            } catch (err) { console.warn('Backend unreachable:', err); }
+        }
+
+        function updateConnectionUI(isConnected) {
+            const dot = document.getElementById('conn-dot');
+            const text = document.getElementById('conn-text');
+            if (isConnected) {
+                dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
+                text.textContent = 'Conectado à Meta';
+                text.className = 'text-xs font-medium text-emerald-700';
+            }
+        }
+
+        function renderAccounts() {
+            const container = document.getElementById('bm-container');
+            const emptyState = document.getElementById('accounts-empty-state');
+            if (state.businesses.length === 0) { container.classList.add('hidden'); emptyState.classList.remove('hidden'); return; }
+            emptyState.classList.add('hidden'); container.classList.remove('hidden');
+            container.innerHTML = state.businesses.map(bm => `
+                <div class="glass-panel rounded-2xl p-6 shadow-sm">
+                    <div class="flex items-center gap-3 mb-4 pb-4 border-b border-slate-100">
+                        <div class="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">BM</div>
+                        <div><h3 class="font-semibold text-slate-800">${bm.name}</h3><p class="text-xs text-slate-500">ID: ${bm.id}</p></div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        ${bm.adAccounts.map(acc => `
+                            <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-sky-300 hover:bg-sky-50/30 cursor-pointer transition-all ${acc.selected ? 'bg-sky-50 border-sky-200' : ''}">
+                                <input type="checkbox" class="w-4 h-4 text-sky-600 rounded" onchange="toggleAccount('${bm.id}', '${acc.id}', this.checked)" ${acc.selected ? 'checked' : ''}>
+                                <div class="flex-1 min-w-0"><p class="text-sm font-medium text-slate-800 truncate">${acc.name}</p><p class="text-xs text-slate-500">${acc.id}</p></div>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.toggleAccount = (bmId, accId, isChecked) => {
+            const bm = state.businesses.find(b => b.id === bmId);
+            if (bm) { const acc = bm.adAccounts.find(a => a.id === accId); if (acc) acc.selected = isChecked; }
+            renderAccounts(); updateDashboard();
+        };
+
+        function getSelectedAccounts() {
+            const selected = [];
+            state.businesses.forEach(bm => { bm.adAccounts.forEach(acc => { if (acc.selected) selected.push({ ...acc, bmName: bm.name }); }); });
+            return selected;
+        }
+
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-sky-400', 'bg-sky-50/50'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('border-sky-400', 'bg-sky-50/50'));
+        dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.classList.remove('border-sky-400', 'bg-sky-50/50'); handleFiles(e.dataTransfer.files); });
+
+        function handleFiles(files) {
+            Array.from(files).forEach(file => {
+                if (!file.type.match(/^(image|video)\//)) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    state.creatives.push({ id: crypto.randomUUID(), name: file.name, type: file.type.startsWith('video') ? 'video' : 'image', preview: e.target.result, file });
+                    renderCreatives(); updateDashboard();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function renderCreatives() {
+            document.getElementById('creatives-grid').innerHTML = state.creatives.map(c => `
+                <div class="relative group aspect-square rounded-xl overflow-hidden border border-slate-200 bg-slate-100 shadow-sm">
+                    ${c.type === 'image' ? `<img src="${c.preview}" class="w-full h-full object-cover">` : `<video src="${c.preview}" class="w-full h-full object-cover"></video>`}
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button onclick="removeCreative('${c.id}')" class="text-white hover:text-red-400 p-2 bg-black/20 rounded-full"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                    </div>
+                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 pt-8"><p class="text-white text-xs font-medium truncate">${c.name}</p></div>
+                </div>
+            `).join('');
+        }
+
+        window.removeCreative = (id) => { state.creatives = state.creatives.filter(c => c.id !== id); renderCreatives(); updateDashboard(); };
+
+        let recognition;
+        document.getElementById('btn-mic').addEventListener('click', () => {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) { alert('Use Chrome ou Edge para voz.'); return; }
+            state.isRecording ? stopRecording() : startRecording();
+        });
+
+        function startRecording() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'pt-BR'; recognition.continuous = false; recognition.interimResults = false;
+            recognition.onstart = () => { state.isRecording = true; document.getElementById('btn-mic').classList.add('mic-active', 'text-white'); document.getElementById('command-input').placeholder = '🎤 Ouvindo...'; };
+            recognition.onresult = (event) => { document.getElementById('command-input').value = event.results[0][0].transcript; stopRecording(); };
+            recognition.onerror = () => stopRecording(); recognition.onend = () => stopRecording();
+            recognition.start();
+        }
+
+        function stopRecording() {
+            state.isRecording = false; document.getElementById('btn-mic').classList.remove('mic-active', 'text-white');
+            document.getElementById('command-input').placeholder = 'Ex: Crie 5 campanhas CBO de vendas...';
+            if (recognition) recognition.stop();
+        }
+
+        document.getElementById('btn-interpret').addEventListener('click', async () => {
+            const command = document.getElementById('command-input').value.trim();
+            if (!command) return;
+            const btn = document.getElementById('btn-interpret');
+            btn.disabled = true; btn.innerHTML = 'Interpretando...';
+            try {
+                const res = await fetch(`${API_BASE}/api/ai/interpret`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ command }) });
+                if (!res.ok) throw new Error('Falha');
+                state.interpretedConfig = await res.json();
+                renderConfigSummary(state.interpretedConfig);
+                document.getElementById('config-section').classList.remove('hidden');
+            } catch (err) { alert('Erro ao interpretar. Verifique o backend.'); }
+            finally { btn.disabled = false; btn.innerHTML = 'Interpretar Comando'; }
+        });
+
+        function renderConfigSummary(config) {
+            const items = [
+                { label: 'Campanhas', value: config.campaigns }, { label: 'Objetivo', value: config.objective },
+                { label: 'Orçamento', value: `R$${config.daily_budget}/dia` }, { label: 'Gênero', value: config.gender },
+                { label: 'Idade', value: `${config.age_min}–${config.age_max}` }, { label: 'Início', value: config.start_time }
+            ];
+            document.getElementById('config-summary').innerHTML = items.map(i => `<div class="bg-slate-50 rounded-lg p-3 border border-slate-100"><p class="text-xs text-slate-500 uppercase mb-1">${i.label}</p><p class="text-sm font-semibold text-slate-800">${i.value}</p></div>`).join('');
+        }
+
+        document.getElementById('btn-edit').addEventListener('click', () => document.getElementById('config-section').classList.add('hidden'));
+        document.getElementById('btn-cancel').addEventListener('click', () => { document.getElementById('config-section').classList.add('hidden'); state.interpretedConfig = null; });
+
+        document.getElementById('btn-create').addEventListener('click', async () => {
+            const selected = getSelectedAccounts();
+            if (selected.length === 0) { alert('Selecione contas primeiro!'); switchView('accounts'); return; }
+            if (!state.interpretedConfig) return;
+            const btn = document.getElementById('btn-create'); btn.disabled = true;
+            document.getElementById('status-section').classList.remove('hidden');
+            addLog('Iniciando criação...', 'info');
+            try {
+                const res = await fetch(`${API_BASE}/api/campaigns/create`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ config: state.interpretedConfig, accountIds: selected.map(a => a.id) }) });
+                const results = await res.json();
+                results.forEach(r => addLog(r.success ? `✓ ${r.campaignName} criada` : `✗ Erro: ${r.error}`, r.success ? 'success' : 'error'));
+            } catch (err) { addLog(`Erro: ${err.message}`, 'error'); }
+            finally { btn.disabled = false; }
+        });
+
+        function addLog(msg, type) {
+            const div = document.createElement('div');
+            div.className = type === 'success' ? 'text-emerald-600' : type === 'error' ? 'text-red-600' : 'text-slate-600';
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            const log = document.getElementById('creation-log'); log.appendChild(div); log.scrollTop = log.scrollHeight;
+        }
+
+        function updateDashboard() {
+            document.getElementById('dash-account-count').textContent = getSelectedAccounts().length;
+            document.getElementById('dash-bm-count').textContent = state.businesses.length;
+            document.getElementById('dash-creative-count').textContent = state.creatives.length;
+        }
+
+        function updateCampaignSidebar() {
+            const selected = getSelectedAccounts();
+            document.getElementById('selected-accounts-mini').innerHTML = selected.length ? selected.map(a => `<div class="p-2 bg-sky-50 rounded text-xs">${a.name}</div>`).join('') : '<p class="text-slate-400 italic text-xs">Nenhuma conta.</p>';
+            document.getElementById('creatives-mini').innerHTML = state.creatives.length ? state.creatives.slice(0,3).map(c => `<div class="aspect-square rounded bg-slate-200 overflow-hidden">${c.type==='image'?`<img src="${c.preview}" class="w-full h-full object-cover">`:`<video src="${c.preview}" class="w-full h-full object-cover"></video>`}</div>`).join('') : '<p class="col-span-3 text-slate-400 italic text-xs">Nenhum criativo.</p>';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { checkAuth(); updateDashboard(); });
+    </script>
+</body>
+</html>
