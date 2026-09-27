@@ -1,550 +1,479 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UTM Tracker - Dashboard</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blaze Ads Manager</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0f1419;--bg2:#1a1f2e;--bg3:#242b3d;--ac:#3b82f6;--ac2:#2563eb;--tx:#e2e8f0;--tx2:#94a3b8;--bd:#2d3748;--ok:#10b981;--err:#ef4444;--warn:#f59e0b}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex}
+.sidebar{width:220px;background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;position:fixed;height:100vh;z-index:100}
+.logo{padding:20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,#f97316,#ef4444);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:bold;color:white;font-size:18px}
+.logo-text{font-size:15px;font-weight:700;color:var(--tx)}
+.logo-sub{font-size:11px;color:var(--tx2)}
+.nav{flex:1;padding:12px 8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;color:var(--tx2);font-size:13px;margin-bottom:2px;transition:all .15s}
+.nav-item:hover,.nav-item.active{background:var(--bg3);color:var(--tx)}
+.nav-item.active{border-left:3px solid var(--ac);color:var(--ac)}
+.nav-icon{width:18px;height:18px;opacity:.7}
+.main{margin-left:220px;flex:1;padding:24px;max-width:1400px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.topbar h1{font-size:22px;font-weight:700}
+.btn{padding:8px 18px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s}
+.btn-primary{background:var(--ac);color:white}
+.btn-primary:hover{background:var(--ac2)}
+.btn-danger{background:var(--err);color:white}
+.btn-ghost{background:transparent;color:var(--tx2);border:1px solid var(--bd)}
+.btn-ghost:hover{border-color:var(--tx2);color:var(--tx)}
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:20px;margin-bottom:16px}
+.card-title{font-size:14px;font-weight:600;margin-bottom:12px;color:var(--tx)}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:18px}
+.stat-label{font-size:12px;color:var(--tx2);margin-bottom:6px}
+.stat-val{font-size:26px;font-weight:700}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:10px 12px;color:var(--tx2);font-weight:600;font-size:11px;text-transform:uppercase;border-bottom:1px solid var(--bd)}
+td{padding:10px 12px;border-bottom:1px solid var(--bd);color:var(--tx)}
+tr:hover td{background:var(--bg3)}
+.toggle{position:relative;width:36px;height:20px;background:var(--bd);border-radius:99px;cursor:pointer;transition:background .2s}
+.toggle.on{background:var(--ok)}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;background:white;border-radius:50%;transition:transform .2s}
+.toggle.on::after{transform:translateX(16px)}
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600}
+.badge-ok{background:rgba(16,185,129,.15);color:var(--ok)}
+.badge-err{background:rgba(239,68,68,.15);color:var(--err)}
+.badge-warn{background:rgba(245,158,11,.15);color:var(--warn)}
+.badge-off{background:rgba(148,163,184,.15);color:var(--tx2)}
+.input{width:100%;padding:8px 12px;background:var(--bg3);border:1px solid var(--bd);border-radius:8px;color:var(--tx);font-size:13px;outline:none}
+.input:focus{border-color:var(--ac)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:200}
+.modal{background:var(--bg2);border:1px solid var(--bd);border-radius:16px;padding:32px;width:400px;max-width:90vw}
+.modal h2{font-size:20px;font-weight:700;margin-bottom:20px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:5px}
+.conn-toast{position:fixed;top:16px;right:16px;background:var(--err);color:white;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;z-index:300;display:none}
+.hidden{display:none!important}
+.view{display:none}
+.view.active{display:block}
+</style>
 </head>
 <body>
-  <div class="app">
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <h1 class="logo">📊 UTM Tracker</h1>
-        <button class="sidebar-toggle" id="sidebarToggle">☰</button>
-      </div>
-      <nav class="sidebar-nav">
-        <a href="#" class="nav-item active" data-page="dashboard">
-          <span class="nav-icon">📈</span>
-          <span class="nav-text">Dashboard</span>
-        </a>
-        <a href="#" class="nav-item" data-page="sales">
-          <span class="nav-icon">💰</span>
-          <span class="nav-text">Vendas</span>
-        </a>
-        <a href="#" class="nav-item" data-page="campaigns">
-          <span class="nav-icon">🎯</span>
-          <span class="nav-text">Campanhas</span>
-        </a>
-        <a href="#" class="nav-item" data-page="links">
-          <span class="nav-icon">🔗</span>
-          <span class="nav-text">Links</span>
-        </a>
-        <a href="#" class="nav-item" data-page="visitors">
-          <span class="nav-icon">👥</span>
-          <span class="nav-text">Visitantes</span>
-        </a>
-        <a href="#" class="nav-item" data-page="events">
-          <span class="nav-icon">⚡</span>
-          <span class="nav-text">Eventos</span>
-        </a>
-        <a href="#" class="nav-item" data-page="integrations">
-          <span class="nav-icon">🔌</span>
-          <span class="nav-text">Integrações</span>
-        </a>
-        <a href="#" class="nav-item" data-page="webhooks">
-          <span class="nav-icon">🪝</span>
-          <span class="nav-text">Webhooks</span>
-        </a>
-        <a href="#" class="nav-item" data-page="tracking">
-          <span class="nav-icon">📍</span>
-          <span class="nav-text">Tracking</span>
-        </a>
-        <a href="#" class="nav-item" data-page="settings">
-          <span class="nav-icon">⚙️</span>
-          <span class="nav-text">Configurações</span>
-        </a>
-      </nav>
-      <div class="sidebar-footer">
-        <div class="user-info" id="userInfo">
-          <span class="user-email">Carregando...</span>
-        </div>
-        <button class="btn-logout" id="logoutBtn">Sair</button>
-      </div>
-    </aside>
 
-    <!-- Main Content -->
-    <main class="main-content">
-      <!-- Top Bar -->
-      <header class="top-bar">
-        <h2 class="page-title" id="pageTitle">Dashboard</h2>
-        <div class="top-bar-actions">
-          <select id="periodSelector" class="period-selector">
-            <option value="today">Hoje</option>
-            <option value="yesterday">Ontem</option>
-            <option value="7d" selected>Últimos 7 dias</option>
-            <option value="30d">Últimos 30 dias</option>
-            <option value="custom">Personalizado</option>
-          </select>
-          <div class="demo-badge" id="demoBadge" style="display: none;">
-            🎭 Dados de Demonstração
-          </div>
-        </div>
-      </header>
-
-      <!-- Page Content -->
-      <div class="page-content" id="pageContent">
-        <!-- Dashboard Page -->
-        <div class="page active" id="page-dashboard">
-          <div class="metrics-grid">
-            <div class="metric-card">
-              <div class="metric-label">Investimento</div>
-              <div class="metric-value" id="metricInvestment">R$ 0,00</div>
-              <div class="metric-change" id="changeInvestment">-</div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-label">Receita</div>
-              <div class="metric-value" id="metricRevenue">R$ 0,00</div>
-              <div class="metric-change" id="changeRevenue">-</div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-label">Vendas</div>
-              <div class="metric-value" id="metricSales">0</div>
-              <div class="metric-change" id="changeSales">-</div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-label">Leads</div>
-              <div class="metric-value" id="metricLeads">0</div>
-              <div class="metric-change" id="changeLeads">-</div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-label">Cliques</div>
-              <div class="metric-value" id="metricClicks">0</div>
-              <div class="metric-change" id="changeClicks">-</div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-label">Conversão</div>
-              <div class="metric-value" id="metricConversion">0%</div>
-              <div class="metric-change" id="changeConversion">-</div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-label">CPA</div>
-              <div class="metric-value" id="metricCPA">R$ 0,00</div>
-              <div class="metric-change" id="changeCPA">-</div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-label">CPL</div>
-              <div class="metric-value" id="metricCPL">R$ 0,00</div>
-              <div class="metric-change" id="changeCPL">-</div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-label">ROAS</div>
-              <div class="metric-value" id="metricROAS">0.00</div>
-              <div class="metric-change" id="changeROAS">-</div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-label">Ticket Médio</div>
-              <div class="metric-value" id="metricAvgTicket">R$ 0,00</div>
-              <div class="metric-change" id="changeAvgTicket">-</div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-label">Lucro Estimado</div>
-              <div class="metric-value" id="metricProfit">R$ 0,00</div>
-              <div class="metric-change" id="changeProfit">-</div>
-            </div>
-          </div>
-
-          <div class="charts-grid">
-            <div class="chart-card">
-              <h3>Receita ao Longo do Tempo</h3>
-              <canvas id="revenueChart"></canvas>
-            </div>
-            <div class="chart-card">
-              <h3>Vendas</h3>
-              <canvas id="salesChart"></canvas>
-            </div>
-            <div class="chart-card">
-              <h3>Cliques</h3>
-              <canvas id="clicksChart"></canvas>
-            </div>
-            <div class="chart-card">
-              <h3>ROAS</h3>
-              <canvas id="roasChart"></canvas>
-            </div>
-          </div>
-
-          <div class="recent-activity">
-            <h3>🎉 Vendas Recentes</h3>
-            <div class="activity-list" id="recentSales">
-              <p class="empty-state">Nenhuma venda registrada ainda</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Sales Page -->
-        <div class="page" id="page-sales">
-          <div class="filters-bar">
-            <input type="text" id="salesSearch" placeholder="Buscar por cliente, produto ou campanha..." class="search-input">
-            <select id="salesStatusFilter" class="filter-select">
-              <option value="">Todos os Status</option>
-              <option value="approved">Aprovado</option>
-              <option value="pending">Pendente</option>
-              <option value="refunded">Reembolsado</option>
-              <option value="cancelled">Cancelado</option>
-            </select>
-          </div>
-          <div class="table-container">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Data</th>
-                  <th>Cliente</th>
-                  <th>Produto</th>
-                  <th>Valor</th>
-                  <th>Status</th>
-                  <th>Origem</th>
-                  <th>Campanha</th>
-                  <th>Anúncio</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody id="salesTableBody">
-                <tr><td colspan="9" class="empty-state">Nenhuma venda encontrada</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Campaigns Page -->
-        <div class="page" id="page-campaigns">
-          <div class="table-container">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Campanha</th>
-                  <th>Plataforma</th>
-                  <th>Investimento</th>
-                  <th>Cliques</th>
-                  <th>Leads</th>
-                  <th>Vendas</th>
-                  <th>Receita</th>
-                  <th>CPA</th>
-                  <th>ROAS</th>
-                </tr>
-              </thead>
-              <tbody id="campaignsTableBody">
-                <tr><td colspan="9" class="empty-state">Nenhuma campanha encontrada</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Links Page -->
-        <div class="page" id="page-links">
-          <div class="links-header">
-            <button class="btn-primary" id="generateLinkBtn">+ Gerar Link Rastreável</button>
-          </div>
-          <div class="table-container">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Nome</th>
-                  <th>URL de Destino</th>
-                  <th>UTM Source</th>
-                  <th>UTM Campaign</th>
-                  <th>Cliques</th>
-                  <th>Criado em</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody id="linksTableBody">
-                <tr><td colspan="7" class="empty-state">Nenhum link gerado ainda</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Visitors Page -->
-        <div class="page" id="page-visitors">
-          <div class="table-container">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Visitor ID</th>
-                  <th>País</th>
-                  <th>Dispositivo</th>
-                  <th>Navegador</th>
-                  <th>Primeira Visita</th>
-                  <th>Última Visita</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody id="visitorsTableBody">
-                <tr><td colspan="7" class="empty-state">Nenhum visitante registrado</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Events Page -->
-        <div class="page" id="page-events">
-          <div class="filters-bar">
-            <select id="eventTypeFilter" class="filter-select">
-              <option value="">Todos os Eventos</option>
-              <option value="page_view">Page View</option>
-              <option value="click">Click</option>
-              <option value="lead">Lead</option>
-              <option value="checkout_started">Checkout Started</option>
-              <option value="purchase">Purchase</option>
-              <option value="refund">Refund</option>
-            </select>
-          </div>
-          <div class="table-container">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Data/Hora</th>
-                  <th>Tipo</th>
-                  <th>UTM Source</th>
-                  <th>UTM Campaign</th>
-                  <th>Dados</th>
-                </tr>
-              </thead>
-              <tbody id="eventsTableBody">
-                <tr><td colspan="5" class="empty-state">Nenhum evento registrado</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Integrations Page -->
-        <div class="page" id="page-integrations">
-          <div class="integrations-grid" id="integrationsGrid">
-            <!-- Populated by JS -->
-          </div>
-        </div>
-
-        <!-- Webhooks Page -->
-        <div class="page" id="page-webhooks">
-          <div class="webhook-info">
-            <h3>Endpoint de Webhook para Vendas</h3>
-            <p>Configure este URL como webhook na sua plataforma de pagamento (Hotmart, Kiwify, Stripe, etc.):</p>
-            <div class="webhook-url-box">
-              <code id="webhookPurchaseUrl">Carregando...</code>
-              <button class="btn-copy" onclick="copyToClipboard('webhookPurchaseUrl')">Copiar</button>
-            </div>
-            <h3>Endpoint de Webhook para Leads</h3>
-            <div class="webhook-url-box">
-              <code id="webhookLeadUrl">Carregando...</code>
-              <button class="btn-copy" onclick="copyToClipboard('webhookLeadUrl')">Copiar</button>
-            </div>
-            <h3>Formato Esperado (Purchase)</h3>
-            <pre class="code-block">{
-  "transaction_id": "ABC123",
-  "customer": {
-    "name": "Cliente",
-    "email": "cliente@email.com"
-  },
-  "amount": 47.00,
-  "currency": "BRL",
-  "status": "approved",
-  "product": "Produto Teste",
-  "session_id": "optional-session-id",
-  "click_id": "optional-click-id"
-}</pre>
-          </div>
-          <h3>Logs de Webhooks Recebidos</h3>
-          <div class="table-container">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Data/Hora</th>
-                  <th>Fonte</th>
-                  <th>Processado</th>
-                  <th>Payload</th>
-                </tr>
-              </thead>
-              <tbody id="webhookLogsBody">
-                <tr><td colspan="4" class="empty-state">Nenhum webhook recebido</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Tracking Page -->
-        <div class="page" id="page-tracking">
-          <div class="tracking-install">
-            <h3>Instalar Script de Tracking</h3>
-            <p>Cole este código antes do <code>&lt;/body&gt;</code> do seu site:</p>
-            <pre class="code-block" id="trackingScriptCode">&lt;script src="https://your-api-domain.com/tracking.js" data-api="https://your-api-domain.com/api/track"&gt;&lt;/script&gt;</pre>
-            <button class="btn-copy" onclick="copyToClipboard('trackingScriptCode')">Copiar Código</button>
-
-            <h3>Testar Rastreamento</h3>
-            <div class="test-tracking-form">
-              <input type="url" id="testUrl" placeholder="Cole uma URL com UTMs para testar" class="search-input">
-              <button class="btn-primary" id="testTrackingBtn">Testar</button>
-            </div>
-            <div class="test-results" id="testResults" style="display: none;">
-              <h4>Resultados do Teste:</h4>
-              <div id="testResultsContent"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Settings Page -->
-        <div class="page" id="page-settings">
-          <div class="settings-section">
-            <h3>Perfil</h3>
-            <form id="profileForm">
-              <div class="form-group">
-                <label>Nome</label>
-                <input type="text" id="settingsName" class="form-input">
-              </div>
-              <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="settingsEmail" class="form-input">
-              </div>
-              <button type="submit" class="btn-primary">Salvar Alterações</button>
-            </form>
-          </div>
-          <div class="settings-section">
-            <h3>Alterar Senha</h3>
-            <form id="passwordForm">
-              <div class="form-group">
-                <label>Senha Atual</label>
-                <input type="password" id="currentPassword" class="form-input">
-              </div>
-              <div class="form-group">
-                <label>Nova Senha</label>
-                <input type="password" id="newPassword" class="form-input">
-              </div>
-              <button type="submit" class="btn-primary">Alterar Senha</button>
-            </form>
-          </div>
-          <div class="settings-section">
-            <h3>Modelo de Atribuição</h3>
-            <select id="attributionModel" class="form-input">
-              <option value="last_click">Last Click (último clique)</option>
-              <option value="first_click">First Click (primeiro clique)</option>
-              <option value="linear">Linear (distribuído)</option>
-            </select>
-            <p class="help-text">Define como as vendas são atribuídas às campanhas quando há múltiplos pontos de contato.</p>
-          </div>
-        </div>
-      </div>
-    </main>
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">B</div>
+    <div><div class="logo-text">Blaze Ads</div><div class="logo-sub">Manager</div></div>
   </div>
+  <nav class="nav">
+    <div class="nav-item active" onclick="switchView('metaads',this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>Meta Ads
+    </div>
+    <div class="nav-item" onclick="switchView('dashboard',this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>Dashboard
+    </div>
+    <div class="nav-item" onclick="switchView('utm',this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>Links UTM
+    </div>
+    <div class="nav-item" onclick="switchView('integrations',this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"/></svg>Integrações
+    </div>
+    <div class="nav-item" onclick="switchView('settings',this)">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Configurações
+    </div>
+  </nav>
+  <div style="padding:12px;border-top:1px solid var(--bd)">
+    <div id="conn-badge" style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg3);border-radius:8px;cursor:pointer;font-size:12px" onclick="switchView('integrations',document.querySelectorAll('.nav-item')[3])">
+      <span id="conn-dot" style="width:8px;height:8px;border-radius:50%;background:var(--tx2)"></span>
+      <span id="conn-text" style="color:var(--tx2)">Desconectado</span>
+    </div>
+  </div>
+</aside>
 
-  <!-- Login Modal -->
-  <div class="modal" id="loginModal">
-    <div class="modal-content">
-      <h2>🔐 Entrar no UTM Tracker</h2>
-      <form id="loginForm">
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="loginEmail" class="form-input" required>
-        </div>
-        <div class="form-group">
-          <label>Senha</label>
-          <input type="password" id="loginPassword" class="form-input" required>
-        </div>
-        <button type="submit" class="btn-primary btn-full">Entrar</button>
-        <p class="modal-footer">Não tem conta? <a href="#" id="showRegister">Cadastre-se</a></p>
-      </form>
+<!-- TOAST -->
+<div class="conn-toast" id="conn-toast">Erro de conexão</div>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- VIEW: META ADS -->
+  <div class="view active" id="view-metaads">
+    <div class="topbar">
+      <h1>Meta Ads</h1>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-ghost" onclick="openModal('create-campaign')">+ Nova Campanha</button>
+        <button class="btn btn-primary" id="btn-connect" onclick="connectMeta()">Conectar Meta</button>
+      </div>
+    </div>
+    <div class="grid-4">
+      <div class="stat-card"><div class="stat-label">Campanhas Ativas</div><div class="stat-val" id="s-active">0</div></div>
+      <div class="stat-card"><div class="stat-label">Gasto Hoje</div><div class="stat-val" id="s-spend">R$ 0</div></div>
+      <div class="stat-card"><div class="stat-label">Conversões</div><div class="stat-val" id="s-conv">0</div></div>
+      <div class="stat-card"><div class="stat-label">ROAS</div><div class="stat-val" id="s-roas">0.00x</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Campanhas</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Status</th><th>Campanha</th><th>Objetivo</th><th>Orçamento</th>
+            <th>Gasto</th><th>Impressões</th><th>Cliques</th><th>CTR</th>
+            <th>CPC</th><th>Conversões</th><th>CPA</th><th>ROAS</th><th>Ações</th>
+          </tr></thead>
+          <tbody id="campaigns-tbody">
+            <tr><td colspan="13" style="text-align:center;color:var(--tx2);padding:40px">Conecte sua conta Meta para ver campanhas</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <!-- Register Modal -->
-  <div class="modal" id="registerModal" style="display: none;">
-    <div class="modal-content">
-      <h2>📝 Criar Conta</h2>
-      <form id="registerForm">
-        <div class="form-group">
-          <label>Nome</label>
-          <input type="text" id="registerName" class="form-input">
-        </div>
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="registerEmail" class="form-input" required>
-        </div>
-        <div class="form-group">
-          <label>Senha</label>
-          <input type="password" id="registerPassword" class="form-input" required>
-        </div>
-        <button type="submit" class="btn-primary btn-full">Criar Conta</button>
-        <p class="modal-footer">Já tem conta? <a href="#" id="showLogin">Entrar</a></p>
-      </form>
+  <!-- VIEW: DASHBOARD -->
+  <div class="view" id="view-dashboard">
+    <div class="topbar"><h1>Dashboard</h1></div>
+    <div class="grid-4">
+      <div class="stat-card"><div class="stat-label">Contas Conectadas</div><div class="stat-val" id="d-accounts">0</div></div>
+      <div class="stat-card"><div class="stat-label">BMs</div><div class="stat-val" id="d-bms">0</div></div>
+      <div class="stat-card"><div class="stat-label">Pixels</div><div class="stat-val" id="d-pixels">0</div></div>
+      <div class="stat-card"><div class="stat-label">Páginas</div><div class="stat-val" id="d-pages">0</div></div>
+    </div>
+    <div class="card"><div class="card-title">Resumo das Contas</div><div id="d-summary" style="color:var(--tx2);font-size:13px">Nenhuma conta conectada.</div></div>
+  </div>
+
+  <!-- VIEW: UTM -->
+  <div class="view" id="view-utm">
+    <div class="topbar"><h1>Links UTM</h1><button class="btn btn-primary">+ Novo Link</button></div>
+    <div class="card"><div class="card-title">Gerador UTM</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+        <div class="field"><label>URL Base</label><input class="input" id="utm-url" placeholder="https://seusite.com.br/produto"></div>
+        <div class="field"><label>Source (utm_source)</label><input class="input" id="utm-source" placeholder="facebook"></div>
+        <div class="field"><label>Medium (utm_medium)</label><input class="input" id="utm-medium" placeholder="paid_social"></div>
+        <div class="field"><label>Campaign (utm_campaign)</label><input class="input" id="utm-campaign" placeholder="black_friday_2024"></div>
+      </div>
+      <button class="btn btn-primary" onclick="generateUTM()">Gerar Link</button>
+      <div id="utm-result" style="margin-top:14px;padding:12px;background:var(--bg3);border-radius:8px;font-size:13px;word-break:break-all;display:none"></div>
     </div>
   </div>
 
-  <!-- Generate Link Modal -->
-  <div class="modal" id="generateLinkModal" style="display: none;">
-    <div class="modal-content modal-large">
-      <h2>🔗 Gerar Link Rastreável</h2>
-      <form id="generateLinkForm">
-        <div class="form-group">
-          <label>Nome do Link (opcional)</label>
-          <input type="text" id="linkName" class="form-input" placeholder="Ex: Campanha TikTok Setembro">
+  <!-- VIEW: INTEGRATIONS -->
+  <div class="view" id="view-integrations">
+    <div class="topbar"><h1>Integrações</h1></div>
+    <div class="card">
+      <div class="card-title">Meta Business</div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:14px;font-weight:600" id="int-meta-status">Desconectado</div>
+          <div style="font-size:12px;color:var(--tx2)" id="int-meta-detail">Conecte para gerenciar campanhas</div>
         </div>
-        <div class="form-group">
-          <label>URL de Destino *</label>
-          <input type="url" id="linkDestination" class="form-input" required placeholder="https://meusite.com/oferta">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>utm_source</label>
-            <input type="text" id="linkUtmSource" class="form-input" placeholder="tiktok">
-          </div>
-          <div class="form-group">
-            <label>utm_medium</label>
-            <input type="text" id="linkUtmMedium" class="form-input" placeholder="paid">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>utm_campaign</label>
-            <input type="text" id="linkUtmCampaign" class="form-input" placeholder="campanha1">
-          </div>
-          <div class="form-group">
-            <label>utm_content</label>
-            <input type="text" id="linkUtmContent" class="form-input" placeholder="video1">
-          </div>
-        </div>
-        <div class="form-group">
-          <label>utm_term</label>
-          <input type="text" id="linkUtmTerm" class="form-input" placeholder="termo">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>campaign_id</label>
-            <input type="text" id="linkCampaignId" class="form-input" placeholder="123">
-          </div>
-          <div class="form-group">
-            <label>adgroup_id</label>
-            <input type="text" id="linkAdgroupId" class="form-input" placeholder="456">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>ad_id</label>
-            <input type="text" id="linkAdId" class="form-input" placeholder="789">
-          </div>
-          <div class="form-group">
-            <label>placement</label>
-            <input type="text" id="linkPlacement" class="form-input" placeholder="feed">
-          </div>
-        </div>
-        <div class="form-group">
-          <label>creative_id</label>
-          <input type="text" id="linkCreativeId" class="form-input" placeholder="abc123">
-        </div>
-        <button type="submit" class="btn-primary btn-full">Gerar Link</button>
-        <div class="generated-link-result" id="generatedLinkResult" style="display: none;">
-          <label>Link Gerado:</label>
-          <div class="webhook-url-box">
-            <code id="generatedLinkUrl"></code>
-            <button type="button" class="btn-copy" onclick="copyToClipboard('generatedLinkUrl')">Copiar</button>
-          </div>
-        </div>
-      </form>
+        <button class="btn btn-primary" id="btn-int-connect" onclick="connectMeta()">Conectar</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Configurações Globais (Pixel / Página / Anunciante)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="field"><label>Pixel ID</label><select class="input" id="g-pixel" onchange="saveGlobal()"><option value="">Carregando...</option></select></div>
+        <div class="field"><label>Página do Facebook</label><select class="input" id="g-page" onchange="saveGlobal()"><option value="">Carregando...</option></select></div>
+        <div class="field"><label>Anunciante (BM)</label><select class="input" id="g-advertiser" onchange="saveGlobal()"><option value="">— nenhum —</option></select></div>
+        <div class="field"><label>Instagram</label><select class="input" id="g-instagram" onchange="saveGlobal()"><option value="">— nenhum —</option></select></div>
+      </div>
     </div>
   </div>
 
-  <!-- Toast Notifications -->
-  <div class="toast-container" id="toastContainer"></div>
+  <!-- VIEW: SETTINGS -->
+  <div class="view" id="view-settings">
+    <div class="topbar"><h1>Configurações</h1></div>
+    <div class="card">
+      <div class="card-title">Conta</div>
+      <div class="field"><label>Nome</label><input class="input" id="cfg-name" placeholder="Seu nome"></div>
+      <div class="field"><label>Email</label><input class="input" id="cfg-email" placeholder="seu@email.com"></div>
+      <button class="btn btn-primary" onclick="saveSettings()">Salvar</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Backend</div>
+      <div class="field"><label>URL da API</label><input class="input" id="cfg-api" value="https://meta-ads-backend-production-2ce8.up.railway.app" readonly style="opacity:.6"></div>
+      <div style="font-size:12px;color:var(--tx2);margin-top:8px">Status: <span id="api-status">verificando...</span></div>
+    </div>
+  </div>
 
-  <script src="app.js"></script>
+</main>
+
+<!-- MODAL: LOGIN -->
+<div class="modal-overlay hidden" id="modal-login">
+  <div class="modal">
+    <h2>Entrar</h2>
+    <div class="field"><label>Email</label><input class="input" id="login-email" placeholder="seu@email.com"></div>
+    <div class="field"><label>Senha</label><input class="input" type="password" id="login-pass" placeholder="••••••••"></div>
+    <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="doLogin()">Entrar</button>
+    <p style="text-align:center;margin-top:14px;font-size:13px;color:var(--tx2)">Não tem conta? <a href="#" style="color:var(--ac)" onclick="showRegister();return false">Cadastrar</a></p>
+    <button style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--tx2);cursor:pointer;font-size:18px" onclick="closeModal('modal-login')">✕</button>
+  </div>
+</div>
+
+<!-- MODAL: REGISTER -->
+<div class="modal-overlay hidden" id="modal-register">
+  <div class="modal">
+    <h2>Criar Conta</h2>
+    <div class="field"><label>Nome</label><input class="input" id="reg-name" placeholder="Seu nome"></div>
+    <div class="field"><label>Email</label><input class="input" id="reg-email" placeholder="seu@email.com"></div>
+    <div class="field"><label>Senha</label><input class="input" type="password" id="reg-pass" placeholder="••••••••"></div>
+    <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="doRegister()">Cadastrar</button>
+    <p style="text-align:center;margin-top:14px;font-size:13px;color:var(--tx2)">Já tem conta? <a href="#" style="color:var(--ac)" onclick="showLogin();return false">Entrar</a></p>
+    <button style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--tx2);cursor:pointer;font-size:18px" onclick="closeModal('modal-register')">✕</button>
+  </div>
+</div>
+
+<!-- MODAL: CREATE CAMPAIGN -->
+<div class="modal-overlay hidden" id="modal-create-campaign">
+  <div class="modal" style="width:520px">
+    <h2>Nova Campanha</h2>
+    <div class="field"><label>Nome da Campanha</label><input class="input" id="cc-name" placeholder="Ex: Vendas Black Friday"></div>
+    <div class="field"><label>Objetivo</label>
+      <select class="input" id="cc-objective">
+        <option value="OUTCOME_SALES">🛒 Vendas</option>
+        <option value="OUTCOME_LEADS">📋 Cadastros</option>
+        <option value="OUTCOME_TRAFFIC">🔗 Tráfego</option>
+        <option value="OUTCOME_ENGAGEMENT">💬 Engajamento</option>
+        <option value="OUTCOME_AWARENESS">👁️ Reconhecimento</option>
+      </select>
+    </div>
+    <div class="field"><label>Orçamento Diário (R$)</label><input class="input" type="number" id="cc-budget" value="25" min="5"></div>
+    <div class="field"><label>URL do Site</label><input class="input" id="cc-url" placeholder="https://seusite.com.br"></div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('modal-create-campaign')">Cancelar</button>
+      <button class="btn btn-primary" style="flex:1" onclick="createCampaign()">Criar Campanha</button>
+    </div>
+    <button style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--tx2);cursor:pointer;font-size:18px" onclick="closeModal('modal-create-campaign')">✕</button>
+  </div>
+</div>
+
+<script>
+const API_BASE = 'https://meta-ads-backend-production-2ce8.up.railway.app';
+let state = { token: localStorage.getItem('blaze_token') || null, connected: false, businesses: [], globalConfig: {} };
+
+// --- NAV ---
+function switchView(name, el) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  if (el) el.classList.add('active');
+}
+
+// --- MODALS ---
+function openModal(id) { document.getElementById('modal-' + id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById('modal-' + id).classList.add('hidden'); }
+function showLogin() { closeModal('modal-register'); openModal('login'); }
+function showRegister() { closeModal('modal-login'); openModal('register'); }
+
+// --- TOAST ---
+function showToast(msg, ms = 3000) {
+  const t = document.getElementById('conn-toast');
+  t.textContent = msg; t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', ms);
+}
+
+// --- AUTH ---
+async function apiCall(path, opts = {}) {
+  try {
+    const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+    if (state.token) headers['Authorization'] = 'Bearer ' + state.token;
+    const res = await fetch(API_BASE + path, { ...opts, headers });
+    if (!res.ok && res.status !== 401) throw new Error('HTTP ' + res.status);
+    return await res.json();
+  } catch (e) {
+    showToast('Erro de conexão');
+    throw e;
+  }
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  if (!email || !pass) { showToast('Preencha todos os campos'); return; }
+  try {
+    const data = await apiCall('/api/auth/local/login', { method: 'POST', body: JSON.stringify({ email, password: pass }) });
+    if (data.token) { state.token = data.token; localStorage.setItem('blaze_token', data.token); closeModal('modal-login'); checkAuth(); }
+    else showToast(data.error || 'Falha no login');
+  } catch(e) { showToast('Erro de conexão'); }
+}
+
+async function doRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass = document.getElementById('reg-pass').value;
+  if (!name || !email || !pass) { showToast('Preencha todos os campos'); return; }
+  try {
+    const data = await apiCall('/api/auth/local/register', { method: 'POST', body: JSON.stringify({ name, email, password: pass }) });
+    if (data.token) { state.token = data.token; localStorage.setItem('blaze_token', data.token); closeModal('modal-register'); checkAuth(); }
+    else showToast(data.error || 'Falha no cadastro');
+  } catch(e) { showToast('Erro de conexão'); }
+}
+
+// --- META CONNECT ---
+function connectMeta() { window.location.href = API_BASE + '/api/auth/login'; }
+
+async function checkAuth() {
+  // Check URL params from OAuth callback
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('auth') === 'success') {
+    const token = params.get('token');
+    if (token) { state.token = token; localStorage.setItem('blaze_token', token); }
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+  if (!state.token) { openModal('register'); return; }
+  try {
+    const data = await apiCall('/api/auth/status');
+    if (data.connected) {
+      state.connected = true; state.businesses = data.businesses || [];
+      if (data.globalConfig) state.globalConfig = data.globalConfig;
+      updateConnUI(true); loadGlobalOptions(); updateDashboard();
+    } else {
+      state.connected = false; updateConnUI(false);
+    }
+  } catch(e) { updateConnUI(false); }
+}
+
+function updateConnUI(ok) {
+  const dot = document.getElementById('conn-dot');
+  const txt = document.getElementById('conn-text');
+  const btn = document.getElementById('btn-connect');
+  const intStatus = document.getElementById('int-meta-status');
+  const intDetail = document.getElementById('int-meta-detail');
+  const intBtn = document.getElementById('btn-int-connect');
+  if (ok) {
+    dot.style.background = 'var(--ok)'; txt.textContent = 'Conectado'; txt.style.color = 'var(--ok)';
+    btn.textContent = 'Desconectar'; btn.className = 'btn btn-danger';
+    btn.onclick = disconnectMeta;
+    intStatus.textContent = 'Conectado'; intStatus.style.color = 'var(--ok)';
+    intDetail.textContent = state.businesses.length + ' BM(s) encontrado(s)';
+    intBtn.textContent = 'Desconectar'; intBtn.className = 'btn btn-danger'; intBtn.onclick = disconnectMeta;
+  } else {
+    dot.style.background = 'var(--tx2)'; txt.textContent = 'Desconectado'; txt.style.color = 'var(--tx2)';
+    btn.textContent = 'Conectar Meta'; btn.className = 'btn btn-primary'; btn.onclick = connectMeta;
+    intStatus.textContent = 'Desconectado'; intStatus.style.color = 'var(--tx2)';
+    intDetail.textContent = 'Conecte para gerenciar campanhas';
+    intBtn.textContent = 'Conectar'; intBtn.className = 'btn btn-primary'; intBtn.onclick = connectMeta;
+  }
+}
+
+async function disconnectMeta() {
+  try { await apiCall('/api/auth/logout', { method: 'POST' }); } catch(e){}
+  state.token = null; state.connected = false; state.businesses = [];
+  localStorage.removeItem('blaze_token');
+  updateConnUI(false);
+}
+
+// --- GLOBAL CONFIG ---
+async function loadGlobalOptions() {
+  const firstAcc = getFirstAccount();
+  if (firstAcc) {
+    try {
+      const data = await apiCall('/api/accounts/' + encodeURIComponent(firstAcc.id) + '/pixels');
+      const sel = document.getElementById('g-pixel');
+      sel.innerHTML = '<option value="">— selecione —</option>' + (data.pixels||[]).map(p => '<option value="'+p.id+'" '+(state.globalConfig.pixelId===p.id?'selected':'')+'>'+esc(p.name)+' ('+p.id+')</option>').join('');
+    } catch(e){}
+  }
+  try {
+    const data = await apiCall('/api/pages');
+    const sel = document.getElementById('g-page');
+    sel.innerHTML = '<option value="">— selecione —</option>' + (data.pages||[]).map(p => '<option value="'+p.id+'" '+(state.globalConfig.pageId===p.id?'selected':'')+'>'+esc(p.name)+'</option>').join('');
+  } catch(e){}
+  const firstBm = state.businesses[0];
+  if (firstBm) {
+    try {
+      const data = await apiCall('/api/businesses/' + firstBm.id + '/advertisers');
+      const sel = document.getElementById('g-advertiser');
+      sel.innerHTML = '<option value="">— nenhum —</option>' + (data.advertisers||[]).map(a => '<option value="'+a.id+'" '+(state.globalConfig.advertiserId===a.id?'selected':'')+'>'+esc(a.name)+'</option>').join('');
+    } catch(e){}
+  }
+  document.getElementById('d-accounts').textContent = getAllAccounts().length;
+  document.getElementById('d-bms').textContent = state.businesses.length;
+}
+
+async function saveGlobal() {
+  state.globalConfig.pixelId = document.getElementById('g-pixel').value || null;
+  state.globalConfig.pageId = document.getElementById('g-page').value || null;
+  state.globalConfig.advertiserId = document.getElementById('g-advertiser').value || null;
+  state.globalConfig.instagramId = document.getElementById('g-instagram').value || null;
+  try { await apiCall('/api/global-config', { method: 'POST', body: JSON.stringify(state.globalConfig) }); } catch(e){}
+}
+
+function getFirstAccount() { for (const bm of state.businesses) { for (const a of bm.adAccounts) { if (a.isActive) return a; } if (bm.adAccounts[0]) return bm.adAccounts[0]; } return null; }
+function getAllAccounts() { const all=[]; state.businesses.forEach(bm=>bm.adAccounts.forEach(a=>all.push(a))); return all; }
+
+// --- CAMPAIGNS ---
+async function createCampaign() {
+  const name = document.getElementById('cc-name').value.trim();
+  const objective = document.getElementById('cc-objective').value;
+  const budget = parseFloat(document.getElementById('cc-budget').value) || 25;
+  const url = document.getElementById('cc-url').value.trim();
+  if (!name) { showToast('Dê um nome à campanha'); return; }
+  const accounts = getAllAccounts().filter(a=>a.isActive).map(a=>a.id);
+  if (!accounts.length) { showToast('Nenhuma conta ativa'); return; }
+  try {
+    const results = await apiCall('/api/campaigns/create', {
+      method: 'POST',
+      body: JSON.stringify({
+        config: { campaign_name: name, objective, daily_budget: budget, website_url: url, campaigns: 1, primary_text: name, headline: name, description: '', call_to_action: 'LEARN_MORE', conversion_event: 'PURCHASE', budget_type: 'CBO', bid_strategy: 'LOWEST_COST_WITHOUT_CAP', gender: 'all', age_min: 18, age_max: 65 },
+        accountIds: accounts,
+        globalConfig: state.globalConfig
+      })
+    });
+    closeModal('modal-create-campaign');
+    if (Array.isArray(results)) {
+      const ok = results.filter(r=>r.success).length;
+      showToast(ok + '/' + results.length + ' campanhas criadas!');
+    }
+  } catch(e) { showToast('Erro ao criar campanha'); }
+}
+
+// --- UTM ---
+function generateUTM() {
+  const url = document.getElementById('utm-url').value.trim();
+  const src = document.getElementById('utm-source').value.trim();
+  const med = document.getElementById('utm-medium').value.trim();
+  const cmp = document.getElementById('utm-campaign').value.trim();
+  if (!url) { showToast('Informe a URL base'); return; }
+  const params = new URLSearchParams();
+  if (src) params.set('utm_source', src);
+  if (med) params.set('utm_medium', med);
+  if (cmp) params.set('utm_campaign', cmp);
+  const result = url + (url.includes('?') ? '&' : '?') + params.toString();
+  const el = document.getElementById('utm-result');
+  el.textContent = result; el.style.display = 'block';
+  navigator.clipboard.writeText(result).catch(()=>{});
+  showToast('Link copiado!');
+}
+
+// --- SETTINGS ---
+function saveSettings() { showToast('Configurações salvas!'); }
+
+// --- DASHBOARD ---
+function updateDashboard() {
+  const all = getAllAccounts();
+  document.getElementById('d-accounts').textContent = all.length;
+  document.getElementById('d-bms').textContent = state.businesses.length;
+  const summary = document.getElementById('d-summary');
+  if (!all.length) { summary.innerHTML = '<span style="color:var(--tx2)">Nenhuma conta conectada.</span>'; return; }
+  summary.innerHTML = all.map(a => '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd)"><span>'+esc(a.name)+'</span><span style="color:var(--tx2)">'+a.currency+' • '+( a.isActive?'<span style=color:var(--ok)>Ativa</span>':'<span style=color:var(--tx2)>Inativa</span>')+'</span></div>').join('');
+}
+
+// --- API STATUS CHECK ---
+async function checkApiStatus() {
+  const el = document.getElementById('api-status');
+  try {
+    const res = await fetch(API_BASE + '/api/auth/status', { signal: AbortSignal.timeout(5000) });
+    if (res.ok) { el.textContent = '✓ Online'; el.style.color = 'var(--ok)'; }
+    else { el.textContent = '⚠ Erro ' + res.status; el.style.color = 'var(--warn)'; }
+  } catch(e) { el.textContent = '✗ Offline'; el.style.color = 'var(--err)'; showToast('Erro de conexão com o servidor'); }
+}
+
+function esc(s) { return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// --- INIT ---
+document.addEventListener('DOMContentLoaded', () => { checkAuth(); checkApiStatus(); });
+</script>
 </body>
 </html>
